@@ -1,0 +1,249 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Calculadora de Papel na Sprint</title>
+    </head>
+    <style>
+        /* http://meyerweb.com/eric/tools/css/reset/ 
+           v2.0 | 20110126
+           License: none (public domain)
+        */
+
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed, 
+        figure, figcaption, footer, header, hgroup, 
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+        /* HTML5 display-role reset for older browsers */
+        article, aside, details, figcaption, figure, 
+        footer, header, hgroup, menu, nav, section {
+            display: block;
+        }
+        body {
+            line-height: 1;
+        }
+        ol, ul {
+            list-style: none;
+        }
+        blockquote, q {
+            quotes: none;
+        }
+        blockquote:before, blockquote:after,
+        q:before, q:after {
+            content: '';
+            content: none;
+        }
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        
+        body *{
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12pt;
+            font-color: #666;
+            font-weight: lighter;
+        }
+        
+        fieldset{
+            margin:20px;
+            border: 1px solid #ACACAC;
+            border-radius: 10px;
+        }
+        
+        fieldset > .section-header{
+            font-size: 16pt;
+            padding: 1em;
+            border-bottom: 1px solid #ACACAC;
+        }
+        
+        fieldset > .content {
+            padding: 20px;
+        }
+        
+        .input-group > input[type=text]{
+            width:3em;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #CCC;
+        }
+        
+        .input-group > label{
+            margin-right: 1em;
+        }
+        
+        button{
+            margin-top: 15px;
+            padding: 0.5em;
+            background-color: #333;
+            color: #FFF;
+            border: 1px solid #000;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.4s ease;
+        }
+        
+        button:hover{
+            background-color: #FFF;
+            color: #000;
+        }
+        
+        table{
+            margin: 20px;
+        }
+        
+        table th, table td{
+            border: 1px solid #ACACAC;
+        }
+        
+        table td{
+            padding: 0.5em;
+        }
+        
+        table .table-header > th{
+            padding: 1em;
+            font-weight: bold;
+        }
+        
+        table .table-body > tr:nth-child(odd){
+            background-color: #E6E6E6;
+        }
+    </style>
+    <body>
+        <fieldset>
+            <div class="section-header">Calculadora de Papel na Sprint</div>
+            
+            <div class="content">
+                <div class="input-group">
+                    <label for="iteracao">Iteração</label>
+                    <input type="text" id="iteracao" maxlength="3"/>
+                </div>
+
+                <button type="button" id="calcular">Calcular</button>
+            </div>
+        </fieldset>
+        
+        <table>
+            <thead>
+                <tr class="table-header">
+                    <th>Colaborador</th>
+                    <th>Papel na Sprint</th>
+                </tr>
+            </thead>
+            <tbody class="table-body">
+            </tbody>
+        </table>
+    </body>
+    
+    <script>
+        var $ = function(selector){
+            return document.querySelectorAll(selector);
+        }
+        
+        var create = function(element){
+            return document.createElement(element);
+        }
+        
+        var colaboradores = [];
+        
+        var Colaborador = function(codigoPapelInicial, nome){
+            this.codigoPapelInicial = codigoPapelInicial;
+            this.nome = nome;
+        }
+
+        var ColaboradorService = (function(){
+            var iteracaoComeco = 401;
+            var papeis = ["Sower", "Worker QA", "Worker Apresentação", "Boring Projeto", "Boring Código", "Stand By"].reverse();
+            
+            var calculaPapel = function(iteracao, colaborador){
+                var indexPapel = (iteracao - iteracaoComeco + colaborador.codigoPapelInicial) % papeis.length;
+                return papeis[indexPapel];
+            }
+            
+            return {calculaPapel : calculaPapel, totalPapeis : papeis.length};
+        })();
+        
+        var montaTabela = function(){
+            var iteracaoSelecionada = parseInt( $("#iteracao")[0].value );
+            
+            if(iteracaoSelecionada < 401){
+                alert("Selecione uma iteração após a 401");
+                return;
+            }
+            
+            var table = $(".table-body")[0];
+
+            if( colaboradores.length === 0 ){
+                var i = ColaboradorService.totalPapeis-1;
+
+                colaboradores.push( new Colaborador(i--,"Henrique") );
+                colaboradores.push( new Colaborador(i--,"Antunes") );
+                colaboradores.push( new Colaborador(i--,"Deysiane") );
+                colaboradores.push( new Colaborador(i--,"Paulo") );
+                colaboradores.push( new Colaborador(i--,"Otavio") );
+                colaboradores.push( new Colaborador(i--,"Watanabe") );
+
+            }
+
+            table.innerHTML = "";
+
+            for(var i in colaboradores){
+                colaboradores[i].papelAtual = ColaboradorService.calculaPapel( iteracaoSelecionada, colaboradores[i] );
+
+                var line      = create("tr");
+                var cellNome  = create("td");
+                var cellPapel = create("td");
+                
+                cellNome.append( colaboradores[i].nome );
+                cellPapel.append( colaboradores[i].papelAtual );
+
+                line.append( cellNome );
+                line.append( cellPapel );
+
+                table.append(line);
+            }
+        }
+        
+        var validaInput = function(e){
+            if(e.keyCode == 13){
+                montaTabela();
+            }
+            
+            if ([46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
+             // Allow: Ctrl/cmd+A
+            (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: Ctrl/cmd+C
+            (e.keyCode == 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: Ctrl/cmd+X
+            (e.keyCode == 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: home, end, left, right
+            (e.keyCode >= 35 && e.keyCode <= 39)) {
+                 // let it happen, don't do anything
+                 return;
+            }
+            
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        }
+        
+        $("#calcular")[0].addEventListener("click", montaTabela);
+        $("#iteracao")[0].addEventListener("keydown", validaInput);
+    </script>
+</html>
